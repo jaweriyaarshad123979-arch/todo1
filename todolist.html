@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+
+            background: linear-gradient(#859ee2, #7dd3fc);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            border-radius: 25px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        #inputValue {
+            flex: 1;
+            padding: 14px 18px;
+            border: none;
+            outline: none;
+            border-radius: 14px;
+            font-size: 15px;
+            background: white;
+        }
+
+        #add,
+        #update {
+            border: none;
+            cursor: pointer;
+            border-radius: 14px;
+            padding: 0 25px;
+            font-weight: 600;
+            transition: .3s;
+            color: white;
+        }
+
+        #add {
+            background: #4f46e5;
+        }
+
+        #add:hover {
+            background: #4338ca;
+        }
+
+        #update {
+            background: #059669;
+            display: none;
+        }
+
+        #update:hover {
+            background: #047857;
+        }
+
+        #listTask {
+            list-style: none;
+        }
+
+        #listTask li {
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px;
+
+            border-radius: 16px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.08);
+
+            transition: .3s;
+        }
+
+        #listTask li:hover {
+            transform: translateY(-3px);
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1e293b;
+            word-break: break-word;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            border: none;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: .3s;
+        }
+
+        .edit-btn {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .edit-btn:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* Responsive */
+
+        @media(max-width:600px) {
+
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            #add,
+            #update {
+                width: 100%;
+                height: 50px;
+            }
+
+            #listTask li {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .action-btns {
+                width: 100%;
+            }
+
+            .edit-btn,
+            .delete-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Task Manager</h2>
+
+        <div class="input-group">
+            <input type="text" id="inputValue" placeholder="What needs to be done?">
+
+            <button id="add" onclick="addTaskHandler()">
+                Add
+            </button>
+
+            <button id="update">
+                Update
+            </button>
+        </div>
+
+        <ul id="listTask"></ul>
+
+    </div>
+
+    <script>
+
+        let getTodovalue =
+            JSON.parse(localStorage.getItem("usertask")) || [];
+
+        function addTaskHandler() {
+
+            let inputValue =
+                document.getElementById("inputValue");
+
+            if (inputValue.value.trim() === "") {
+                alert("Please enter a task");
+                return;
+            }
+
+            let taskObj = {
+                id: Date.now(),
+                task: inputValue.value
+            };
+
+            getTodovalue.push(taskObj);
+
+            localStorage.setItem(
+                "usertask",
+                JSON.stringify(getTodovalue)
+            );
+
+            inputValue.value = "";
+
+            getTask();
+        }
+
+        function getTask() {
+
+            let listTask =
+                document.getElementById("listTask");
+
+            listTask.innerHTML = "";
+
+            getTodovalue.forEach((item) => {
+
+                listTask.innerHTML += `
+        <li>
+
+            <span class="task-text">${item.task}</span>
+
+            <div class="action-btns">
+
+                <button
+                class="edit-btn"
+                onclick="EditTask(${item.id})">
+                Edit
+                </button>
+
+                <button
+                class="delete-btn"
+                onclick="deleteTask(${item.id})">
+                Delete
+                </button>
+
+            </div>
+
+        </li>
+        `;
+            });
+        }
+
+        function deleteTask(id) {
+
+            getTodovalue =
+                getTodovalue.filter(
+                    item => item.id !== id
+                );
+
+            localStorage.setItem(
+                "usertask",
+                JSON.stringify(getTodovalue)
+            );
+
+            getTask();
+        }
+
+        function EditTask(id) {
+
+            let updateBtn =
+                document.getElementById("update");
+
+            let addBtn =
+                document.getElementById("add");
+
+            let inputField =
+                document.getElementById("inputValue");
+
+            updateBtn.style.display = "block";
+            addBtn.style.display = "none";
+
+            let selectedTask =
+                getTodovalue.find(
+                    item => item.id === id
+                );
+
+            inputField.value = selectedTask.task;
+
+            updateBtn.onclick = function () {
+
+                if (inputField.value.trim() === "") {
+                    alert("Task cannot be empty");
+                    return;
+                }
+
+                getTodovalue =
+                    getTodovalue.map(item => {
+
+                        if (item.id === id) {
+                            item.task = inputField.value;
+                        }
+
+                        return item;
+                    });
+
+                localStorage.setItem(
+                    "usertask",
+                    JSON.stringify(getTodovalue)
+                );
+
+                inputField.value = "";
+
+                updateBtn.style.display = "none";
+                addBtn.style.display = "block";
+
+                getTask();
+            };
+        }
+
+        getTask();
+
+    </script>
+
+</body>
+
+</html>
